@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:flutter/services.dart'; // Import for platform channel
+import 'package:flutter_sound/flutter_sound.dart';
+import 'dart:io';
 
 void main() {
   runApp(const App());
@@ -27,7 +28,7 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int _selectedIndex = 1; // Home selected by default
+  int _selectedIndex = 1;
 
   static List<Widget> _screens = [
     const HistoryScreen(),
@@ -47,41 +48,6 @@ class _MainScreenState extends State<MainScreen> {
       appBar: AppBar(
         title: const Text("App"),
       ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              color: Colors.blue,
-              child: const Text(
-                "Menu",
-                style: TextStyle(color: Colors.white, fontSize: 18),
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.person),
-              title: const Text("Profile"),
-              onTap: () {},
-            ),
-            ListTile(
-              leading: const Icon(Icons.settings),
-              title: const Text("Settings"),
-              onTap: () {},
-            ),
-            ListTile(
-              leading: const Icon(Icons.brightness_6),
-              title: const Text("Theme"),
-              onTap: () {},
-            ),
-            ListTile(
-              leading: const Icon(Icons.logout),
-              title: const Text("Sign Out"),
-              onTap: () {},
-            ),
-          ],
-        ),
-      ),
       body: _screens[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
@@ -97,7 +63,7 @@ class _MainScreenState extends State<MainScreen> {
   }
 }
 
-// Home Screen with Microphone Icon & Native Function Call
+// Home Screen with Microphone Recording
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -106,35 +72,48 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  static const platform = MethodChannel('com.example.myapp/native'); // Method Channel
-  String nativeMessage = "Press button to get message";
+  FlutterSoundRecorder? _recorder;
+  bool _isRecording = false;
+  String? _filePath;
 
   @override
   void initState() {
     super.initState();
-    requestMicrophonePermission();
+    _initRecorder();
+  }
+
+  Future<void> _initRecorder() async {
+    _recorder = FlutterSoundRecorder();
+    await _recorder!.openRecorder();
+    await requestMicrophonePermission();
   }
 
   Future<void> requestMicrophonePermission() async {
     var status = await Permission.microphone.request();
-    if (status.isGranted) {
-      print("Microphone permission granted");
-    } else if (status.isDenied) {
-      print("Microphone permission denied");
-    } else if (status.isPermanentlyDenied) {
+    if (!status.isGranted) {
       openAppSettings();
     }
   }
 
-  Future<void> getNativeMessage() async {
-    try {
-      final String result = await platform.invokeMethod('getNativeMessage');
-      setState(() {
-        nativeMessage = result;
-      });
-    } catch (e) {
-      print("Failed to get native message: $e");
+  Future<void> _toggleRecording() async {
+    if (_isRecording) {
+      _filePath = await _recorder!.stopRecorder();
+      print("Recording saved: $_filePath");
+    } else {
+      Directory tempDir = Directory.systemTemp;
+      _filePath = '${tempDir.path}/temp_audio.aac';
+      await _recorder!.startRecorder(toFile: _filePath);
+      print("Recording started...");
     }
+    setState(() {
+      _isRecording = !_isRecording;
+    });
+  }
+
+  @override
+  void dispose() {
+    _recorder!.closeRecorder();
+    super.dispose();
   }
 
   @override
@@ -150,20 +129,20 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             padding: const EdgeInsets.all(15),
             child: IconButton(
-              icon: const Icon(Icons.mic, size: 50, color: Colors.blue),
-              onPressed: () {
-                requestMicrophonePermission();
-              },
+              icon: Icon(
+                _isRecording ? Icons.stop : Icons.mic,
+                size: 50,
+                color: Colors.blue,
+              ),
+              onPressed: _toggleRecording,
             ),
           ),
         ),
         const SizedBox(height: 20),
-        ElevatedButton(
-          onPressed: getNativeMessage,
-          child: const Text("Get Native Message"),
+        Text(
+          _isRecording ? "Recording..." : "Tap mic to start recording",
+          style: const TextStyle(fontSize: 16),
         ),
-        const SizedBox(height: 10),
-        Text(nativeMessage, style: const TextStyle(fontSize: 16)),
       ],
     );
   }

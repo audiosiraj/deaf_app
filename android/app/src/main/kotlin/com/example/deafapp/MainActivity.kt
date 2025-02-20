@@ -8,7 +8,6 @@ import androidx.core.content.ContextCompat
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.embedding.engine.FlutterEngine
-import io.flutter.embedding.engine.dart.DartExecutor
 
 class MainActivity : FlutterActivity() {
     private val CHANNEL = "com.example.myapp/native"
@@ -26,7 +25,7 @@ class MainActivity : FlutterActivity() {
     }
 
     private fun requestMicrophonePermission() {
-        if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(
                 this,
                 arrayOf(Manifest.permission.RECORD_AUDIO),
@@ -34,7 +33,6 @@ class MainActivity : FlutterActivity() {
             )
         }
     }
-
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
