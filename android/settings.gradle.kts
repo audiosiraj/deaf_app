@@ -12,9 +12,6 @@ pluginManagement {
     repositories {
         google()
         mavenCentral()
-        maven { url = uri("https://jitpack.io") }
-        maven { url = uri("file:///Users/yourusername/my-local-repo") }
-        maven { url = uri("file:///path/to/your/local/repo") }
         gradlePluginPortal()
     }
 }
