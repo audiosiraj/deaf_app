@@ -1,0 +1,2 @@
+C:/Users/shaik parveen/voice_to_text_app/android/app/.cxx/Debug/4w3m1a2f/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Users/shaik parveen/voice_to_text_app/android/app/.cxx/Debug/4w3m1a2f/armeabi-v7a/CMakeFiles/rebuild_cache.dir

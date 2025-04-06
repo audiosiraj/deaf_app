@@ -1,0 +1,1 @@
+C:\Users\shaik parveen\voice_to_text_app\build\app\intermediates\cxx\Debug\11s635ql\obj\arm64-v8a
