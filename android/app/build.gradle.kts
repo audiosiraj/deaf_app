@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.voice_to_text_app"
+    namespace = "com.example.faed_app"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "27.0.12077973"
 
